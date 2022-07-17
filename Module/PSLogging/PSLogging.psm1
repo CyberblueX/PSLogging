@@ -1,4 +1,4 @@
-###
+﻿###
 # Modifyed by CyberblueX
 # Setting default parameter for Logfile Name to System UUID
 # Added Time measure functions
@@ -116,10 +116,10 @@ Function Start-Log {
     IF ($EnableWinEventlog) {
         IF (!([system.diagnostics.eventlog]::SourceExists("$sWinEventlog_Source"))) {
             IF (!([system.diagnostics.eventlog]::Exists($sWinEventlog_Name))) {
-                New-EventLog �LogName $sWinEventlog_Name �Source $sWinEventlog_Source
+                New-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source
                 Limit-EventLog -LogName $sWinEventlog_Name -MaximumSize 524288 -OverFlowAction OverwriteOlder -RetentionDays 360 -ErrorAction SilentlyContinue
             } ELSE {
-                New-EventLog �LogName $sWinEventlog_Name �Source $sWinEventlog_Source
+                New-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source
             }
         } ELSE {
             $sSourceLog = [system.diagnostics.eventlog]::LogNameFromSourceName($sWinEventlog_Source,".")
@@ -137,7 +137,7 @@ Function Start-Log {
         
         Edit-FileWait -Path $sFullPath -Scriptblock {
           $null = Remove-Item -Path $sFullPath -Force
-          $null = New-Item -Path $sFullPath �ItemType File
+          $null = New-Item -Path $sFullPath –ItemType File
         }
 
     } ELSEIF (Test-Path -Path $sFullPath) {
@@ -147,7 +147,7 @@ Function Start-Log {
     } ELSE {
         #Create file and start logging
         $sCreateNew = $true
-        $null = New-Item -Path $sFullPath �ItemType File
+        $null = New-Item -Path $sFullPath –ItemType File
     } 
     #endregion
 
@@ -195,13 +195,13 @@ Function Start-Log {
             $sSysInfo_Net_Interfaces            = @( ($snetwork_phys_adapter1).Description )
             $sSysInfo_Net_MACs                  = @( ($snetwork_phys_adapter1).MacAddress )
             $sSysInfo_Net_IPv4s                 = @(($snetwork_info1).IPAddress.Where({$_ -match "\b(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}\b"}))
-            #$sSysInfo_Net_IPv6s                 = @( (Get-NetAdapter -Physical | Get-NetIPAddress -AddressFamily IPv6).IPAddress )
+            $sSysInfo_Net_IPv6s                 = @()
         } ELSE {
             $OFS = " ; "
             $sSysInfo_Net_Interfaces            = @((Get-NetAdapter -Physical).InterfaceDescription)
             $sSysInfo_Net_MACs                  = @((Get-NetAdapter -Physical).MacAddress)
-            $sSysInfo_Net_IPv4s                 = @((Get-NetAdapter -Physical | Get-NetIPAddress -AddressFamily IPv4).IPAddress)
-            #$sSysInfo_Net_IPv6s                 = @((Get-NetAdapter -Physical | Get-NetIPAddress -AddressFamily IPv6).IPAddress)
+            $sSysInfo_Net_IPv4s                 = @((Get-NetAdapter -Physical | Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue).IPAddress)
+            $sSysInfo_Net_IPv6s                 = @((Get-NetAdapter -Physical | Get-NetIPAddress -AddressFamily IPv6 -ErrorAction SilentlyContinue).IPAddress)
         }
         
         If (!$sCreateNew) {
@@ -243,7 +243,7 @@ Function Start-Log {
                     $sSysInfo_Values += $sSysInfo_Value
 
                     #Variant 2
-                    Add-Member -InputObject $sSysInfo_Values2 -NotePropertyName $line_filter[0].Replace(' ',"_") -NotePropertyValue $line_filter[1]
+                    Add-Member -InputObject $sSysInfo_Values2 -NotePropertyName $line_filter[0].Replace(' ',"_") -NotePropertyValue $line_filter[1] -Force
                 } 
 
          #       ForEach ($line in $sSysInfo_Values) {
@@ -309,6 +309,8 @@ Function Start-Log {
             #    $sLogfile_Content_add += "`r`n"
                 $sLogfile_Content_add += ('"Network IPv4s"           = "' + $sSysInfo_Net_IPv4s + '"')
             #    $sLogfile_Content_add += "`r`n"
+                $sLogfile_Content_add += ('"Network IPv6s"           = "' + $sSysInfo_Net_IPv6s + '"')
+            #    $sLogfile_Content_add += "`r`n"
                 foreach ($disk in $sDiskDrive) { 
                 $sLogfile_Content_add += '"Disk' + $disk.Index + '"                   = "' + $disk.Model + " ; " + ([math]::Round($disk.Size/1gb))+ "GB" + " ; " + ([math]::Round($disk.Size/1gb))+ "GB" + '"'
             #    $sLogfile_Content_add += "`r`n"
@@ -347,6 +349,7 @@ Function Start-Log {
           $sLogfile_Content_new += ('"Network Interfaces"      = "' + $sSysInfo_Net_Interfaces + '"')
           $sLogfile_Content_new += ('"Network MACs"            = "' + $sSysInfo_Net_MACs + '"')
           $sLogfile_Content_new += ('"Network IPv4s"           = "' + $sSysInfo_Net_IPv4s + '"')
+          $sLogfile_Content_new += ('"Network IPv6s"           = "' + $sSysInfo_Net_IPv6s + '"')
           foreach ($disk in $sDiskDrive) { 
           $sLogfile_Content_new += '"Disk' + $disk.Index + '"                   = "' + $disk.Model + " ; " + ([math]::Round($disk.Size/1gb))+ "GB" + '"'
           }
@@ -402,7 +405,7 @@ Version [$ScriptVersion]
 
     #Write to WinEventlog
     IF ($sEnableWinEventlog){
-      Write-EventLog �LogName $sWinEventlog_Name �Source $sWinEventlog_Source �EntryType Information �EventID 1 �Message $str
+      Write-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source –EntryType Information –EventID 1 –Message $str
     }
 
     #Write to Logfile
@@ -530,7 +533,7 @@ Function Write-LogInfo {
     
     #Write to WinEventlog
     IF ($sEnableWinEventlog -and !$noEventlog) {
-      Write-EventLog �LogName $sWinEventlog_Name �Source $sWinEventlog_Source �EntryType Information �EventID 1 �Message $Message
+      Write-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source –EntryType Information –EventID 1 –Message $Message
     }
 
     #Write Content to Log
@@ -630,7 +633,7 @@ Function Write-LogWarning {
  
     #Write to WinEventlog
     IF ($sEnableWinEventlog -and !$noEventlog) {
-      Write-EventLog �LogName $sWinEventlog_Name �Source $sWinEventlog_Source �EntryType Warning �EventID 3 �Message $Message
+      Write-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source –EntryType Warning –EventID 3 –Message $Message
     }
 
     #Write Content to Log
@@ -770,7 +773,7 @@ Function Write-LogError {
 
     #Write to WinEventlog
     IF ($sEnableWinEventlog -and !$noEventlog) {
-      Write-EventLog �LogName $sWinEventlog_Name �Source $sWinEventlog_Source �EntryType Error �EventID 4 �Message $Message
+      Write-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source –EntryType Error –EventID 4 –Message $Message
     }
 
     #Write to screen for debug mode
@@ -895,7 +898,7 @@ Finished processing at [$((Get-Date).ToUniversalTime().ToString()) UTC]. Needed:
 
     #Write to WinEventlog
     IF ($sEnableWinEventlog){
-    Write-EventLog �LogName $sWinEventlog_Name �Source $sWinEventlog_Source �EntryType Information �EventID 2 �Message $str2
+    Write-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source –EntryType Information –EventID 2 –Message $str2
     }
 
     #Write to Logfile
