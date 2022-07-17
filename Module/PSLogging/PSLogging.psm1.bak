@@ -1,5 +1,5 @@
 ###
-# Modifyed by CyberblueX
+# Modifyed by CyberblueX cyberbluex@outlook.com
 # Setting default parameter for Logfile Name to System UUID
 # Added Time measure functions
 # Changed all functions to use LogPath & Logname Parameter
@@ -116,10 +116,10 @@ Function Start-Log {
     IF ($EnableWinEventlog) {
         IF (!([system.diagnostics.eventlog]::SourceExists("$sWinEventlog_Source"))) {
             IF (!([system.diagnostics.eventlog]::Exists($sWinEventlog_Name))) {
-                New-EventLog ï¿½LogName $sWinEventlog_Name ï¿½Source $sWinEventlog_Source
+                New-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source
                 Limit-EventLog -LogName $sWinEventlog_Name -MaximumSize 524288 -OverFlowAction OverwriteOlder -RetentionDays 360 -ErrorAction SilentlyContinue
             } ELSE {
-                New-EventLog ï¿½LogName $sWinEventlog_Name ï¿½Source $sWinEventlog_Source
+                New-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source
             }
         } ELSE {
             $sSourceLog = [system.diagnostics.eventlog]::LogNameFromSourceName($sWinEventlog_Source,".")
@@ -137,7 +137,7 @@ Function Start-Log {
         
         Edit-FileWait -Path $sFullPath -Scriptblock {
           $null = Remove-Item -Path $sFullPath -Force
-          $null = New-Item -Path $sFullPath ï¿½ItemType File
+          $null = New-Item -Path $sFullPath –ItemType File
         }
 
     } ELSEIF (Test-Path -Path $sFullPath) {
@@ -147,7 +147,7 @@ Function Start-Log {
     } ELSE {
         #Create file and start logging
         $sCreateNew = $true
-        $null = New-Item -Path $sFullPath ï¿½ItemType File
+        $null = New-Item -Path $sFullPath –ItemType File
     } 
     #endregion
 
@@ -402,7 +402,7 @@ Version [$ScriptVersion]
 
     #Write to WinEventlog
     IF ($sEnableWinEventlog){
-      Write-EventLog ï¿½LogName $sWinEventlog_Name ï¿½Source $sWinEventlog_Source ï¿½EntryType Information ï¿½EventID 1 ï¿½Message $str
+      Write-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source –EntryType Information –EventID 1 –Message $str
     }
 
     #Write to Logfile
@@ -530,7 +530,7 @@ Function Write-LogInfo {
     
     #Write to WinEventlog
     IF ($sEnableWinEventlog -and !$noEventlog) {
-      Write-EventLog ï¿½LogName $sWinEventlog_Name ï¿½Source $sWinEventlog_Source ï¿½EntryType Information ï¿½EventID 1 ï¿½Message $Message
+      Write-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source –EntryType Information –EventID 1 –Message $Message
     }
 
     #Write Content to Log
@@ -630,7 +630,7 @@ Function Write-LogWarning {
  
     #Write to WinEventlog
     IF ($sEnableWinEventlog -and !$noEventlog) {
-      Write-EventLog ï¿½LogName $sWinEventlog_Name ï¿½Source $sWinEventlog_Source ï¿½EntryType Warning ï¿½EventID 3 ï¿½Message $Message
+      Write-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source –EntryType Warning –EventID 3 –Message $Message
     }
 
     #Write Content to Log
@@ -770,7 +770,7 @@ Function Write-LogError {
 
     #Write to WinEventlog
     IF ($sEnableWinEventlog -and !$noEventlog) {
-      Write-EventLog ï¿½LogName $sWinEventlog_Name ï¿½Source $sWinEventlog_Source ï¿½EntryType Error ï¿½EventID 4 ï¿½Message $Message
+      Write-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source –EntryType Error –EventID 4 –Message $Message
     }
 
     #Write to screen for debug mode
@@ -895,7 +895,7 @@ Finished processing at [$((Get-Date).ToUniversalTime().ToString()) UTC]. Needed:
 
     #Write to WinEventlog
     IF ($sEnableWinEventlog){
-    Write-EventLog ï¿½LogName $sWinEventlog_Name ï¿½Source $sWinEventlog_Source ï¿½EntryType Information ï¿½EventID 2 ï¿½Message $str2
+    Write-EventLog –LogName $sWinEventlog_Name –Source $sWinEventlog_Source –EntryType Information –EventID 2 –Message $str2
     }
 
     #Write to Logfile
